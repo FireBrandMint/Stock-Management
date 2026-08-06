@@ -14,7 +14,7 @@ public class DBUser: IdentityUser
         {"Worker", 1},
         {"Manager", 2},
         {"Owner", 3},
-        {"DEV", 3}
+        {"DEV", 4}
     }.ToFrozenDictionary();
     public const int LevelCanPromote = 2;
 }

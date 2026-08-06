@@ -99,7 +99,7 @@ public class AuthEndpoint: AuthAwareEndpoint
         
         var target_level = await GetRoleLevel(target);
 
-        if(user_level < target_level)
+        if(user_level <= target_level)
             return Forbid("Lower staff cannot de-rank higher staff");
 
         // Remove existing hierarchy roles
