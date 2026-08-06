@@ -89,7 +89,7 @@ public class AuthEndpoint: AuthAwareEndpoint
 
         int user_level = await this.GetRoleLevel(caller);
 
-        if (user_level < DBUser.LevelCanPromote || user_level < desired_level)
+        if (user_level < DBUser.LevelCanPromote || user_level <= desired_level)
             return Forbid();
 
         var target = await Users.FindByNameAsync(request.UserName);
