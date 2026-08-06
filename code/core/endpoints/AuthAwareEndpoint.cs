@@ -49,7 +49,7 @@ public class AuthAwareEndpoint: ControllerBase
         return level;
     }
 
-    public async Task<bool> IsUserA(DBUser user, string role)
+    public async Task<bool> IsUserAn(DBUser user, string role)
     {
         if(!DBUser.Roles.ContainsKey(role))
             throw new ArgumentException($"Role {role} does not exist currently.");

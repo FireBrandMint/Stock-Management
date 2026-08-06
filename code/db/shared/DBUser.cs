@@ -13,6 +13,8 @@ public class DBUser: IdentityUser
         {"Guest", 0},
         {"Worker", 1},
         {"Manager", 2},
-        {"Owner", 3} 
+        {"Owner", 3},
+        {"DEV", 3}
     }.ToFrozenDictionary();
+    public const int LevelCanPromote = 2;
 }

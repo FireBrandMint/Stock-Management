@@ -43,6 +43,74 @@ public class AuthEndpoint: AuthAwareEndpoint
         return Ok();
     }
 
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(RegisterRequest request)
+    {
+        // Username already exists?
+        if (await Users.FindByNameAsync(request.UserName) != null)
+            return BadRequest("Username already exists.");
+
+        var user = new DBUser
+        {
+            UserName = request.UserName,
+            Email = request.Email
+        };
+
+        var result = await Users.CreateAsync(user, request.Password);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        // True if first user because
+        // it was already added,
+        // so count becomes 1 on the 1st time.
+        bool firstUser = Users.Users.Count() == 1;
+
+        await Users.AddToRoleAsync(
+            user,
+            firstUser ? "DEV" : "Guest");
+
+        await SignInManager.SignInAsync(user, isPersistent: true);
+
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPost("promote")]
+    public async Task<IActionResult> Promote(PromoteRequest request)
+    {
+        var caller = await Users.GetUserAsync(User);
+
+        if (caller == null)
+            return Unauthorized();
+        
+        if(!DBUser.Roles.TryGetValue(request.Role, out var target_level))
+            return BadRequest("Unknown role.");
+
+        int user_level = await this.GetRoleLevel(caller);
+
+        if (user_level < DBUser.LevelCanPromote || user_level < target_level)
+            return Forbid();
+
+        var target = await Users.FindByNameAsync(request.UserName);
+
+        if (target == null)
+            return NotFound();
+
+        // Remove existing hierarchy roles
+        var currentRoles = await Users.GetRolesAsync(target);
+
+        foreach (var role in currentRoles)
+        {
+            if (DBUser.Roles.ContainsKey(role))
+                await Users.RemoveFromRoleAsync(target, role);
+        }
+
+        await Users.AddToRoleAsync(target, request.Role);
+
+        return Ok();
+    }
+
     [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
@@ -64,5 +132,18 @@ public class AuthEndpoint: AuthAwareEndpoint
     {
         public string UserField {get;set;} = "";
         public string PWField {get;set;} = "";
+    }
+
+    public class RegisterRequest
+    {
+        public string UserName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+    public class PromoteRequest
+    {
+        public string UserName { get; set; } = "";
+        public string Role { get; set; } = "";
     }
 }
