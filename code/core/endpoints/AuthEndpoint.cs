@@ -84,18 +84,23 @@ public class AuthEndpoint: AuthAwareEndpoint
         if (caller == null)
             return Unauthorized();
         
-        if(!DBUser.Roles.TryGetValue(request.Role, out var target_level))
+        if(!DBUser.Roles.TryGetValue(request.Role, out var desired_level))
             return BadRequest("Unknown role.");
 
         int user_level = await this.GetRoleLevel(caller);
 
-        if (user_level < DBUser.LevelCanPromote || user_level < target_level)
+        if (user_level < DBUser.LevelCanPromote || user_level < desired_level)
             return Forbid();
 
         var target = await Users.FindByNameAsync(request.UserName);
 
         if (target == null)
             return NotFound();
+        
+        var target_level = await GetRoleLevel(target);
+
+        if(user_level < target_level)
+            return Forbid("Lower staff cannot de-rank higher staff");
 
         // Remove existing hierarchy roles
         var currentRoles = await Users.GetRolesAsync(target);
