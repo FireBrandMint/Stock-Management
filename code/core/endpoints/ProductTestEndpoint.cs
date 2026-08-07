@@ -10,17 +10,17 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/test_products")]
 public class ProductTestEndpoint: ControllerBase
 {
+    //TODO
+    /*
     [HttpGet("{id}")]
     public ActionResult<TestProduct.GetResult> Get(int id)
     {
-        throw new NotImplementedException();
-        /*
         var product = FindProduct(id);
 
         if (product == null)
             return NotFound();
 
         return Ok(product);
-        */
     }
+    */
 }

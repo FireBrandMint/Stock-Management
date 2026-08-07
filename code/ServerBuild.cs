@@ -46,14 +46,20 @@ public static class ServerBuild
 
         //DB config//
 
-        services.AddDbContext<ApplicationDBContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+        services.AddDbContext<UserDBContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("Users")));
+
+        services.AddDbContext<ProductDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("ProductRegistry")));
+
+        services.AddDbContext<ProductFluxDBContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("ProductFlux")));
 
         //Auth//
         services.AddAuthorization();
 
         services.AddIdentity<DBUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDBContext>();
+            .AddEntityFrameworkStores<UserDBContext>();
 
         builder.Services.ConfigureApplicationCookie(options =>
         {

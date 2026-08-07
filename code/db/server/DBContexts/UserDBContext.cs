@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-public class ApplicationDBContext: IdentityDbContext<DBUser>
+public class UserDBContext: IdentityDbContext<DBUser>
 {
     
 }
