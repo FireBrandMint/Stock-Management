@@ -13,13 +13,5 @@ public class ProductFlux
     public TransactionState TransactionState {get;set;}
     public string Currency {get;set;} = "R$";
     public double Money {get;set;}
-    public string RegDate {get;set;} = GetCurrentDate();
-
-    public static string GetCurrentDate()
-    {
-        var now = DateTime.Now;
-        var culture = new CultureInfo("pt-BR");
-        //dd/MM/yyyy HH:mm (e.g., 06/08/2026 23:13)
-        return now.ToString("g", culture);
-    }
+    public DateTime RegDate {get;set;} = DateTime.Now;
 }
