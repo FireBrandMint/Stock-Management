@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-public class ProductDbContext : DbContext
+public class ProductDBContext : DbContext
 {
     public DbSet<Product> Products => Set<Product>();
 
-    public ProductDbContext(DbContextOptions<ProductDbContext> options) : base(options) { }
+    public ProductDBContext(DbContextOptions<ProductDBContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

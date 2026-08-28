@@ -5,9 +5,13 @@ using System.Threading.Tasks;
 
 public enum ProductState: int
 {
-    IMPORTED = 0,
+    #region DECREMENT_PRODUCT
+    PROCESSED = 0,
     EXPORTED = 1,
     LOST = 2,
-    PROCESSED = 3,
+    #endregion
+    #region INCREMENT_PRODUCT
+    IMPORTED = 3,
     FABRICATED = 4
+    #endregion
 }

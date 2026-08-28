@@ -27,6 +27,11 @@ public class AuthAwareEndpoint: ControllerBase
         return await Users.FindByNameAsync(username);
     }
 
+    public async Task<DBUser?> GetCurrentUser()
+    {
+        return await Users.GetUserAsync(User);
+    }
+
     public async Task<IList<string>> GetRoles(DBUser user) => await Users.GetRolesAsync(user);
 
     public async Task<int> GetRoleLevel(DBUser user)
@@ -47,6 +52,26 @@ public class AuthAwareEndpoint: ControllerBase
                 level = curr_level;
 
         return level;
+    }
+
+    public async Task<int> GetRoleLevel(string role)
+    {
+        int level;
+
+        if(!DBUser.Roles.TryGetValue(role, out level))
+            level = -1;
+        
+        return level;
+    }
+
+    public async Task<int> GetRoleLevel()
+    {
+        var caller = await Users.GetUserAsync(User);
+
+        if (caller == null)
+            return -1;
+        
+        return await GetRoleLevel(caller);
     }
 
     public async Task<bool> IsUserAn(DBUser user, string role)

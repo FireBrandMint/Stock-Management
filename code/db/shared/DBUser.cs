@@ -12,9 +12,15 @@ public class DBUser: IdentityUser
     {
         {"Guest", 0},
         {"Worker", 1},
-        {"Manager", 2},
-        {"Owner", 3},
-        {"DEV", 4}
+        //Stock Registration Especialist
+        {"SRE", 2},
+        //Product Registration Especialist
+        {"PRE", 3},
+        {"Manager", 4},
+        {"Owner", 5},
+        {"DEV", 6}
     }.ToFrozenDictionary();
-    public const int LevelCanPromote = 2;
+    public const int LevelCanPromote = 4;
+    public const int LevelCanManageStock = 2;
+    public const int LevelCanManageProduct = 3;
 }

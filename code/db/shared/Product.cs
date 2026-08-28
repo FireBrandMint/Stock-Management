@@ -13,5 +13,6 @@ public class Product
     //TODO: Possibly implement GS1 barcode system to generate this.
     public string Barcode { get; set; } = "";
 
-    public ProductState State { get; set; }
+    public string PriceCurrency { get; set; } = "R$";
+    public double Price { get; set; } = 0.0;
 }

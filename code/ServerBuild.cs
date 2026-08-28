@@ -49,11 +49,11 @@ public static class ServerBuild
         services.AddDbContext<UserDBContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Users")));
 
-        services.AddDbContext<ProductDbContext>(options =>
+        services.AddDbContext<ProductDBContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("ProductRegistry")));
 
-        services.AddDbContext<ProductFluxDBContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("ProductFlux")));
+        services.AddDbContext<StockDBContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("Stock")));
 
         //Auth//
         services.AddAuthorization();
