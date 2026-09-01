@@ -7,5 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 public class UserDBContext: IdentityDbContext<DBUser>
 {
-    
+    public UserDBContext(DbContextOptions<UserDBContext> options)
+    : base(options)
+    {
+    }
 }

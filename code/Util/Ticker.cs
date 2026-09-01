@@ -46,7 +46,7 @@ public class Ticker
         SkipTickThresold = skipTickThresold;
         LastStamp = Stopwatch.GetTimestamp();
     }
-    public bool ShouldExecute(out double elapsingTicks)
+    public async Task<(bool can_run, double elapsing_ticks)> ShouldExecute()
     {
         var curr_stamp = Stopwatch.GetTimestamp();
         var last_stamp = LastStamp;
@@ -58,26 +58,29 @@ public class Ticker
         
         bool should_process = delta >= 1.0;
 
+        double elapsing_ticks;
+
         if(should_process)
         {
             delta -= 1.0;
             if(delta > SkipTickThresold)
             {
-                elapsingTicks = 1.0 + delta;
+                elapsing_ticks = 1.0 + delta;
                 delta = 0.0;
             }
             else
-                elapsingTicks = 1.0;
+                elapsing_ticks = 1.0;
         }
         else
         {
-            elapsingTicks = 0.0;
+            elapsing_ticks = 0.0;
             double reverse_delta = 1.0 - delta;
-            Thread.Sleep((int)(reverse_delta * (TickDelay * 1000)));
+            await Task.Delay((int)(reverse_delta * (TickDelay * 1000)));
+            //Thread.Sleep((int)(reverse_delta * (TickDelay * 1000)));
         }
 
         Delta = delta;
 
-        return should_process;
+        return (should_process, elapsing_ticks);
     }
 }

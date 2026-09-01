@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using BCrypt.Net;
 
 [ApiController]
 [Route("api/auth")]
@@ -22,29 +23,30 @@ public class AuthEndpoint: AuthAwareEndpoint
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var user = await GetUser(request.UserField);
+        var user = await GetUser(request.UserName);
 
         if (user == null)
-            return Unauthorized();
+            return NotFound("No such user.");
 
         var result = await SignInManager.PasswordSignInAsync(
-            request.UserField,
-            request.PWField,
+            request.UserName,
+            //BCrypt.Net.BCrypt.HashPassword(request.Password, DBUser.SALT),
+            request.Password,
             isPersistent: true,
             lockoutOnFailure: true
         );
 
         if (!result.Succeeded)
-            return Unauthorized();
+            return Unauthorized("Wrong password.");
         
         await SignInManager.SignInAsync(user, isPersistent: true);
 
         // Success
-        return Ok();
+        return Ok("Success!");
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         // Username already exists?
         if (await Users.FindByNameAsync(request.UserName) != null)
@@ -59,7 +61,7 @@ public class AuthEndpoint: AuthAwareEndpoint
         var result = await Users.CreateAsync(user, request.Password);
 
         if (!result.Succeeded)
-            return BadRequest(result.Errors);
+            return BadRequest(result.Errors.Select(e => e.Description));
 
         // True if first user because
         // it was already added,
@@ -72,7 +74,7 @@ public class AuthEndpoint: AuthAwareEndpoint
 
         await SignInManager.SignInAsync(user, isPersistent: true);
 
-        return Ok();
+        return Ok("Registered successfully.");
     }
 
     [Authorize]
@@ -82,7 +84,7 @@ public class AuthEndpoint: AuthAwareEndpoint
         var caller = await Users.GetUserAsync(User);
 
         if (caller == null)
-            return Unauthorized();
+            return Unauthorized("Not logged in!");
         
         if(!DBUser.Roles.TryGetValue(request.Role, out var desired_level))
             return BadRequest("Unknown role.");
@@ -90,17 +92,17 @@ public class AuthEndpoint: AuthAwareEndpoint
         int user_level = await this.GetRoleLevel(caller);
 
         if (user_level < DBUser.LevelCanPromote || user_level <= desired_level)
-            return Forbid();
+            return Forbid("Not enough privileges!");
 
         var target = await Users.FindByNameAsync(request.UserName);
 
         if (target == null)
-            return NotFound();
+            return NotFound("No such user!");
         
         var target_level = await GetRoleLevel(target);
 
         if(user_level <= target_level)
-            return Forbid("Lower staff cannot de-rank higher staff");
+            return Forbid("Lower staff cannot de-rank higher staff.");
 
         // Remove existing hierarchy roles
         var currentRoles = await Users.GetRolesAsync(target);
@@ -113,7 +115,7 @@ public class AuthEndpoint: AuthAwareEndpoint
 
         await Users.AddToRoleAsync(target, request.Role);
 
-        return Ok();
+        return Ok($"Promoted {request.UserName} successfully to {request.Role}!");
     }
 
     [Authorize]
@@ -135,8 +137,8 @@ public class AuthEndpoint: AuthAwareEndpoint
 
     public class LoginRequest
     {
-        public string UserField {get;set;} = "";
-        public string PWField {get;set;} = "";
+        public string UserName {get;set;} = "";
+        public string Password {get;set;} = "";
     }
 
     public class RegisterRequest

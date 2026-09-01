@@ -33,7 +33,7 @@ public class ProductEndpoint: AuthAwareEndpoint
             .SingleOrDefaultAsync(x => x.Barcode == barcode);
 
         if (product == null)
-            return NotFound();
+            return NotFound("No such product!");
 
         return Ok(product);
     }
@@ -46,7 +46,7 @@ public class ProductEndpoint: AuthAwareEndpoint
         DB.Products.Add(product);
         await DB.SaveChangesAsync();
 
-        return Ok(product);
+        return Ok("Product registered!");
     }
 
     [HttpPut("{barcode}")]
@@ -59,7 +59,7 @@ public class ProductEndpoint: AuthAwareEndpoint
             .SingleOrDefaultAsync(x => x.Barcode == barcode);
 
         if (existing == null)
-            return NotFound();
+            return NotFound("No such product.");
 
         // Copy whatever fields you're allowing to change.
         existing.Name = product.Name;
@@ -79,11 +79,11 @@ public class ProductEndpoint: AuthAwareEndpoint
             .SingleOrDefaultAsync(x => x.Barcode == barcode);
 
         if (product == null)
-            return NotFound();
+            return NotFound("No such product!");
 
         DB.Products.Remove(product);
         await DB.SaveChangesAsync();
 
-        return NoContent();
+        return Ok($"Removed item:\n{product}");
     }
 }

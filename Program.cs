@@ -1,16 +1,17 @@
 ﻿
+using System;
+using System.Threading.Tasks;
 
 public static class Program
 {
     public static volatile bool IsAlive;
-    public static async void Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
+        Console.WriteLine("Main executed.");
         IsAlive = true;
 
-        #if SERVER
-            ServerBuild.Run(args);
-        #elif CLIENT
-            ClientBuild.Run(args);
-        #endif
+        await ServerBuild.Run(args);
+
+        return 0;
     }
 }

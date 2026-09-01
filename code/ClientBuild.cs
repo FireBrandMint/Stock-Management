@@ -9,15 +9,15 @@ public static class ClientBuild
 {
     private static Ticker ProcessArbiter = new Ticker(20, 1.0);
     public static int TPS => ProcessArbiter.TPS;
-    public static async void Run(string[] args)
+    public static async Task Run(string[] args)
     {
         Init();
 
-        double delta;
         while(Program.IsAlive)
         {
-            if(ProcessArbiter.ShouldExecute(out delta))
-                Tick(delta);
+            var se = await ProcessArbiter.ShouldExecute();
+            if(se.can_run)
+                Tick(se.elapsing_ticks);
         }
     }
 

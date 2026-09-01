@@ -1,0 +1,4 @@
+dotnet tool install --global dotnet-ef
+dotnet ef migrations add InitialIdentity --context UserDBContext
+dotnet ef database update --context UserDBContext
+

@@ -23,23 +23,43 @@ public static class ServerBuild
 
     public static async Task Run(string[] args)
     {
+        Console.WriteLine("Starting endpoint aplication.");
         //Init the APP
         await Init(args);
 
+        await ConsoleLoop();
+
         //Start ticking
         ProcessArbiter = new Ticker(60, 1.0);
-        double delta;
         while(Program.IsAlive)
         {
-            if(ProcessArbiter.ShouldExecute(out delta))
-                Tick(delta);
+            var se = await ProcessArbiter.ShouldExecute();
+            if(se.can_run)
+                Tick(se.elapsing_ticks);
         }
 
         await App.StopAsync();
     }
 
+    private static async Task ConsoleLoop()
+    {
+        while (Program.IsAlive)
+        {
+            string? command = await ReadLineAsync();
+
+            if (command == "stop")
+                Program.IsAlive = false;
+        }
+    }
+
+    private static Task<string?> ReadLineAsync()
+    {
+        return Task.Run(() => Console.ReadLine());
+    }
+
     static async Task Init(string[] args)
     {
+        //Console.WriteLine("Not blocked 1");
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
         var services = builder.Services;
         builder.Services.AddEndpointsApiExplorer();
@@ -58,12 +78,18 @@ public static class ServerBuild
         //Auth//
         services.AddAuthorization();
 
-        services.AddIdentity<DBUser, IdentityRole>()
-            .AddEntityFrameworkStores<UserDBContext>();
+        services.AddIdentity<DBUser, IdentityRole>(options =>
+        {
+            options.Password.RequiredLength = 3;
+            options.Password.RequireDigit = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+        }).AddEntityFrameworkStores<UserDBContext>();
 
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            options.Cookie.Name = "StockAuth";
+            options.Cookie.Name = "AuthStockApp";
 
             options.ExpireTimeSpan = TimeSpan.FromDays(7);
 
@@ -93,6 +119,8 @@ public static class ServerBuild
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+
+        //Console.WriteLine("Not blocked 2");
         
         //Register roles//
         using (var scope = app.Services.CreateScope())
@@ -106,6 +134,8 @@ public static class ServerBuild
             }
         }
 
+        //Console.WriteLine("Not blocked 3");
+
         if(app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -113,7 +143,11 @@ public static class ServerBuild
         }
 
         //This works because the thread is launched instead of blocking.
-        app.StartAsync().Wait();
+        await app.StartAsync();
+
+        //Console.WriteLine("Not blocked 4");
+
+        Console.WriteLine("Loaded all!.");
     }
 
     static void Tick(double delta)
@@ -127,8 +161,9 @@ public static class ServerBuild
         {
             while (Program.IsAlive)
             {
-                if (ProcessArbiter.ShouldExecute(out double delta))
-                    Tick(delta);
+                var result = await ProcessArbiter.ShouldExecute();
+                if (result.can_run)
+                    Tick(result.elapsing_ticks);
             }
         }
     }

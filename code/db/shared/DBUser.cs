@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 public class DBUser: IdentityUser
 {
+    public const int SALT = 9050237;
     public static FrozenDictionary<string, int> Roles = new Dictionary<string, int>()
     {
         {"Guest", 0},

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 public class Product
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.CreateVersion7();
 
     public string Name { get; set; } = "";
 
